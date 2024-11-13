@@ -8,27 +8,32 @@
         body {
             margin: 20px auto;
             font-family: 'Lato', sans-serif;
-            background: #f0f0f0; /* Lighter background for better contrast */
+            background: linear-gradient(135deg, #2c3e50, #1abc9c); /* Futuristic gradient */
             color: #333;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: flex-start;  /* Ensure navbar stays at the top */
+            min-height: 100vh;  /* Ensure the body takes full height */
+            background-attachment: fixed; /* Fixed background for a more futuristic feel */
         }
 
         h1 {
             margin-bottom: 20px;
+            font-size: 36px;
+            color: #fff;  /* White color for the title */
         }
 
         /* Navbar styles */
         .navbar {
-            background-color: #2c3e50;
+            background-color: rgba(44, 62, 80, 0.9); /* Semi-transparent navbar */
             width: 100%;
             padding: 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             display: flex;
-            justify-content: center; /* Center align the links */
+            justify-content: center;
+            z-index: 100;  /* Keep navbar on top */
         }
-
         .navbar ul {
             list-style: none;
             padding: 0;
@@ -48,20 +53,42 @@
             color: #1abc9c; /* Change color on hover */
         }
 
+        /* Task Container */
         .task-container {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px; /* Space between sticky notes */
+            justify-content: space-between;
+            width: 90%;
+            gap: 40px;
+            margin-top: 20px;
+            margin-bottom: 20px;  /* Ensure space for content */
+        }
+
+        /* Left column for incomplete tasks */
+        .tasks-left {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 45%;
+        }
+
+        /* Right column for completed tasks */
+        .tasks-right {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 15%;
         }
 
         .sticky-note {
-            background: #ffc; /* Background color for sticky notes */
+            background: rgba(255, 255, 255, 0.8); /* Semi-transparent background for sticky notes */
             border-radius: 10px;
-            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
             padding: 20px;
             width: 150px; /* Width of each sticky note */
             transition: transform 0.15s; /* Smooth scale transition */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .sticky-note:hover {
@@ -114,6 +141,7 @@
     </style>
 </head>
 <body>
+
     <!-- Navigation Bar -->
     <div class="navbar">
         <ul>
@@ -127,11 +155,11 @@
         </ul>
     </div>
  
-<h1>Task Tracker  </h1> <h3> Hello ! {{ user.username }} </h3>
+    <h1>Task Tracker</h1>
+    <h3>Hello, {{ user.username }}!</h3>
+
     <!-- Add Task Form -->
     <input type="text" class="task-input" id="taskInput" placeholder="Add a new task">
-    
-    <!-- Priority Selector -->
     <select class="priority-selector" id="prioritySelector">
         <option value="C" style="color: blue;">Nice to Do</option>
         <option value="B" style="color: red;">Important</option>
@@ -142,14 +170,31 @@
     <button class="add-task" onclick="addTask()">Add Task</button>
 
     <!-- Task List -->
-    <div class="task-container" id="taskList">
-        {% for task in tasks %}
-            <div class="sticky-note" id="task-{{ task.id }}">
-                <p>{{ task.task_text }} - Priority: {{ task.get_priority_display }} - {% if task.completed %} Done {% else %} Not Done {% endif %}</p>
-                <button class="delete-task" onclick="deleteTask({{ task.id }})">Delete</button>
-                <button class="mark-done" onclick="markTaskDone({{ task.id }})">Mark as Done</button>
-            </div>
-        {% endfor %}
+    <div class="task-container">
+        <div class="tasks-left" id="tasksLeft">
+            <h3>Incomplete Tasks</h3>
+            {% for task in tasks %}
+                {% if not task.completed %}
+                    <div class="sticky-note" id="task-{{ task.id }}">
+                        <p>{{ task.task_text }} - Priority: {{ task.get_priority_display }}</p>
+                        <button class="delete-task" onclick="deleteTask({{ task.id }})">Delete</button>
+                        <button class="mark-done" onclick="markTaskDone({{ task.id }})">Mark as Done</button>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="tasks-right" id="tasksRight">
+            <h3>Completed Tasks</h3>
+            {% for task in tasks %}
+                {% if task.completed %}
+                    <div class="sticky-note" id="task-{{ task.id }}">
+                        <p>{{ task.task_text }} - Priority: {{ task.get_priority_display }}</p>
+                        <button class="delete-task" onclick="deleteTask({{ task.id }})">Delete</button>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
     </div>
 
     <script>
@@ -157,7 +202,7 @@
             const taskInput = document.getElementById('taskInput');
             const prioritySelector = document.getElementById('prioritySelector');
             const taskText = taskInput.value.trim();
-            const priority = prioritySelector.value;  // Get selected priority
+            const priority = prioritySelector.value;
 
             if (!taskText) {
                 alert('Please enter a task');
@@ -171,12 +216,12 @@
                         'Content-Type': 'application/json',
                         'X-CSRFToken': '{{ csrf_token }}',
                     },
-                    body: JSON.stringify({ task_text: taskText, priority: priority }),  // Include priority in the request
+                    body: JSON.stringify({ task_text: taskText, priority: priority }),
                 });
 
                 const data = await response.json();
                 if (data.id) {
-                    const taskList = document.getElementById('taskList');
+                    const tasksLeft = document.getElementById('tasksLeft');
                     const newTask = document.createElement('div');
                     newTask.id = `task-${data.id}`;
                     newTask.className = 'sticky-note';
@@ -184,7 +229,7 @@
                         <p>${data.task_text} - Priority: ${data.priority} - Not Done</p>
                         <button class="mark-done" onclick="markTaskDone(${data.id})">Mark as Done</button>
                         <button class="delete-task" onclick="deleteTask(${data.id})">Delete</button>`;
-                    taskList.appendChild(newTask);
+                    tasksLeft.appendChild(newTask);
                     taskInput.value = '';
                     prioritySelector.value = 'C';  // Reset to default priority
                 }
@@ -215,22 +260,24 @@
         async function markTaskDone(taskId) {
             try {
                 const response = await fetch(`/mark_done/${taskId}/`, {
-                    method: 'POST',
+                    method: 'PATCH',
                     headers: {
                         'X-CSRFToken': '{{ csrf_token }}',
                     },
                 });
 
                 const data = await response.json();
-                if (data.message) {
+                if (data.message === 'Task marked as done') {
                     const taskItem = document.getElementById(`task-${taskId}`);
-                    taskItem.innerHTML = `<p>${taskItem.textContent.split(' - ')[0]} - Done</p>
-                    <button class="delete-task" onclick="deleteTask(${taskId})">Delete</button>`;
+                    taskItem.querySelector('.mark-done').disabled = true; // Disable button
+                    taskItem.querySelector('.mark-done').textContent = 'Done';
+                    document.getElementById('tasksRight').appendChild(taskItem);  // Move to completed tasks
                 }
             } catch (error) {
                 console.error('Error marking task as done:', error);
             }
         }
     </script>
+
 </body>
 </html>
