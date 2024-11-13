@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <style>
+        body {
+            margin: 20px auto;
+            font-family: 'Lato';
+            background:#666;
+            color:#fff;
+          }
+          
+          *{
+            margin:0;
+            padding:0;
+          }
+          
+          h2 {
+            font-weight: bold;
+            font-size: 2rem;
+          }
+          p {
+            font-family: 'Reenie Beanie';
+            font-size: 2rem;
+          }
+          ul,li{
+            list-style:none;
+          }
+          ul{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+          }
+          ul li a{
+            text-decoration:none;
+            color:#000;
+            background:#ffc;
+            display:block;
+            height:10em;
+            width:10em;
+            padding:1em;
+            box-shadow: 5px 5px 7px rgba(33,33,33,.7);
+            transform: rotate(-6deg);
+            transition: transform .15s linear;
+          }
+          
+          ul li:nth-child(even) a{
+            transform:rotate(4deg);
+            position:relative;
+            top:5px;
+            background:#cfc;
+          }
+          ul li:nth-child(3n) a{
+            transform:rotate(-3deg);
+            position:relative;
+            top:-5px;
+            background:#ccf;
+          }
+          ul li:nth-child(5n) a{
+            transform:rotate(5deg);
+            position:relative;
+            top:-10px;
+          }
+          
+          ul li a:hover,ul li a:focus{
+            box-shadow:10px 10px 7px rgba(0,0,0,.7);
+            transform: scale(1.25);
+            position:relative;
+            z-index:5;
+          }
+          
+          ul li{
+            margin:1em;
+          }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Hello, Welcome {{ user_data.username }}!</h1>
+        <p>Your email: {{ user_data.email }}</p>
+        
+        <!-- Task Adding Section -->
+        <div class="task-form">
+            <input type="text" class="task-input" placeholder="Add a new task" id="taskInput">
+            <button class="add-task" onclick="addTask()">Add Task</button>
+        </div>
+
+        <!-- Task List -->
+        <ul class="task-list" id="taskList">
+            {% for task in tasks %}
+                <li class="task-item" id="task-{{ task.id }}">
+                    <a href="#">
+                      <h2>{{ task.task_text }} </h2>
+                      <p>Priority: {{ task.get_priority_display }}</p>
+                      <p>Status: {{ task.completed|yesno:"Completed,Not Completed" }}</p>
+                      <p>Created At: {{ task.created_at }}</p>
+                      <button class="complete-task" onclick="completeTask({{ task.id }})">{{ task.completed|yesno:"Mark as Incomplete,Mark as Complete" }}</button>
+                      <button class="delete-task" onclick="deleteTask({{ task.id }})">Delete</button>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+        
+        <!-- Logout Button -->
+        {% comment %} <a href="{% url '' %}" class="logout">Logout</a> {% endcomment %}
+    </div>
+
+    <script>
+        async function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const taskText = taskInput.value.trim();
+    
+            if (!taskText) {
+                alert('Please enter a task!');
+                return;
+            }
+    
+            try {
+                const response = await fetch('{% url "add_task" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({ task_text: taskText }),
+                });
+    
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+    
+                const data = await response.json();
+                if (data.id) {
+                    // Update the task list in the UI
+                    const taskList = document.getElementById('taskList');
+                    const newTask = document.createElement('li');
+                    newTask.className = 'task-item';
+                    newTask.id = `task-${data.id}`;
+                    newTask.innerHTML = `
+                        <h2>${taskText}</h2>
+                        <p>Priority: ${data.priority}</p>
+                        <p>Status: Not Completed</p>
+                        <p>Created At: ${data.created_at}</p>
+                        <button class="complete-task" onclick="completeTask(${data.id})">Mark as Complete</button>
+                        <button class="delete-task" onclick="deleteTask(${data.id})">Delete</button>`;
+                    taskList.appendChild(newTask);
+    
+                    // Clear the input
+                    taskInput.value = '';
+                } else {
+                    alert('Error adding task: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error adding task:', error);
+                alert('Error adding task. Please try again.');
+            }
+        }
+
+        async function completeTask(taskId) {
+            try {
+                const response = await fetch(`/complete-task/${taskId}/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                if (data.message) {
+                    // Update the task status in the UI
+                    const taskItem = document.getElementById(`task-${taskId}`);
+                    const statusElem = taskItem.querySelector('p:nth-of-type(2)');
+                    const buttonElem = taskItem.querySelector('.complete-task');
+                    statusElem.textContent = `Status: ${data.completed ? 'Completed' : 'Not Completed'}`;
+                    buttonElem.textContent = data.completed ? 'Mark as Incomplete' : 'Mark as Complete';
+                } else {
+                    alert('Error updating task: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error updating task:', error);
+                alert('Error updating task. Please try again.');
+            }
+        }
+
+        async function deleteTask(taskId) {
+            try {
+                const response = await fetch(`/delete-task/${taskId}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                if (data.message) {
+                    // Remove the task from the UI
+                    const taskItem = document.getElementById(`task-${taskId}`);
+                    taskItem.remove();
+                } else {
+                    alert('Error deleting task: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error deleting task:', error);
+                alert('Error deleting task. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>
