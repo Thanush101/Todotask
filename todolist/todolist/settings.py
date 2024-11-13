@@ -29,8 +29,7 @@ ALLOWED_HOSTS = [
     'todotask-production-227c.up.railway.app',
     'localhost',
     '127.0.0.1',
-    'yourdomain.com',  # If you have a custom domain
-    'www.yourdomain.com',
+    'https://todotask-production-227c.up.railway.app/',
 ]
 
 
