@@ -87,7 +87,7 @@ def user_login(request):
             return redirect('task_list')  # Redirect to your task list page after login
         else:
             return HttpResponse('Invalid username or password')
-    return render(request, 'templates\registration\login.html')
+    return render(request, 'registration/login.html')
 
 
 from django.contrib.auth import logout
