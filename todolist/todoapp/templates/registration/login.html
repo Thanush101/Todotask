@@ -4,58 +4,131 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Lato:wght@300&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Lato', sans-serif;
-            background: #f0f0f0;
-            color: #333;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #eee;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            overflow: hidden;
         }
 
         .form-container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+            width: 350px;
+            text-align: center;
         }
 
         .form-container h2 {
             margin-bottom: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            color: #00adb5;
+            text-transform: uppercase;
         }
 
         input {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             margin-bottom: 15px;
-            border: 1px solid #ccc;
+            border: none;
             border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #eee;
+            outline: none;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        input::placeholder {
+            color: #aaa;
+        }
+
+        input:focus {
+            background: rgba(255, 255, 255, 0.3);
         }
 
         button {
             width: 100%;
-            padding: 10px;
-            background: #2ecc71;
+            padding: 12px;
+            background: #00adb5;
             border: none;
             border-radius: 5px;
-            color: white;
+            color: #fff;
+            font-size: 16px;
             cursor: pointer;
+            transition: background 0.3s;
         }
 
         button:hover {
-            background: #27ae60;
+            background: #00797c;
         }
 
         .redirect {
-            text-align: center;
-            margin-top: 10px;
+            margin-top: 15px;
+        }
+
+        .redirect a {
+            color: #00adb5;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .redirect a:hover {
+            color: #00797c;
+        }
+
+        /* Floating particles */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: float 10s infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.6;
+            }
+            50% {
+                transform: translateY(-50px) rotate(180deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(0) rotate(360deg);
+                opacity: 0.6;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="particles">
+        <div class="particle" style="width: 10px; height: 10px; top: 20%; left: 15%; animation-duration: 7s;"></div>
+        <div class="particle" style="width: 12px; height: 12px; top: 40%; left: 80%; animation-duration: 12s;"></div>
+        <div class="particle" style="width: 8px; height: 8px; top: 60%; left: 30%; animation-duration: 8s;"></div>
+        <div class="particle" style="width: 14px; height: 14px; top: 80%; left: 50%; animation-duration: 10s;"></div>
+    </div>
     <div class="form-container">
         <h2>User Login</h2>
         <form method="POST">
