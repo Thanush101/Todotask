@@ -11,7 +11,7 @@ from django.http import HttpResponse
 
 # View for listing tasks
 def task_list(request):
-    tasks = Task..filter(user=request.user)
+    tasks = Task.filter(user=request.user)
     return render(request, 'task_list.html', {'tasks': tasks})
 
 # View for adding a task
