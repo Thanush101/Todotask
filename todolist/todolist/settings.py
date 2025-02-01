@@ -30,6 +30,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'https://todotask-production-227c.up.railway.app/',
+    'todotask-production-8751.up.railway.app',
 ]
 CSRF_TRUSTED_ORIGINS = [
     'https://todotask-production-227c.up.railway.app',
