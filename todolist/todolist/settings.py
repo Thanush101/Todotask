@@ -32,7 +32,7 @@ ALLOWED_HOSTS = [
     'todotask-production-eab4.up.railway.app'
 ]
 CSRF_TRUSTED_ORIGINS = [
-   'https://todotask-production-eab4.up.railway.app', If your app also runs over HTTP
+   'https://todotask-production-eab4.up.railway.app',
 ]
 
 
